@@ -6,7 +6,13 @@ export class Board {
 
     private readonly units: Map<Unit, Square> = new Map<Unit, Square>();
 
-    public constructor(private readonly _size: number) {
+    private readonly _size: number;
+
+    /**
+     * @param _size
+     */
+    public constructor(_size: number) {
+        this._size = _size;
     }
 
     /**
@@ -82,7 +88,7 @@ export class Board {
         if (!this.units.has(unit)) {
             throw 'No such unit on the board';
         }
-        return <Square>this.units.get(unit);
+        return this.units.get(unit) as Square;
     }
 
     /**

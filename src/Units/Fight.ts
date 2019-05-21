@@ -2,10 +2,24 @@ import {Weapon} from "./Weapon";
 import {Result} from "./Result";
 
 export class Fight {
-    constructor(private readonly one: Weapon, private readonly two: Weapon) {
+
+    private readonly one: Weapon;
+
+    private readonly two: Weapon;
+
+    /**
+     * @param one
+     * @param two
+     */
+    public constructor(one: Weapon, two: Weapon) {
+        this.two = two;
+        this.one = one;
 
     }
 
+    /**
+     *
+     */
     public result(): Result {
         if (this.one === this.two) {
             return Result.Draw;

@@ -1,5 +1,5 @@
-export type Square = {
-    x: number,
-    y: number,
-};
+export interface Square {
+    x: number;
+    y: number;
+}
 

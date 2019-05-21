@@ -1,7 +1,7 @@
 import {Weapon} from "../Units/Weapon";
 
-export type BoardDump = {
+export interface BoardDump {
     [x: number]: {
-        [y: number]: Weapon
-    }
-};
+        [y: number]: Weapon;
+    };
+}
