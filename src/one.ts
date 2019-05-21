@@ -10,9 +10,9 @@ const unit3 = new Unit(Weapon.Paper);
 
 
 const board = new Board(6);
-board.add(unit1, {x: 0, y: 0});
+board.add(unit1, {x: 3, y: 2});
 board.add(unit2, {x: 1, y: 0});
-board.add(unit3, {x: 0, y: 1});
+board.add(unit3, {x: 4, y: 3});
 
 const result = unit1.fight(unit2);
 if (Result.Win === result) {

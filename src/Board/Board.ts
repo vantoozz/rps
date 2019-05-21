@@ -1,5 +1,6 @@
 import {Unit} from "../Units/Unit";
 import {Square} from "./Square";
+import {BoardDump} from "./BoardDump";
 
 export class Board {
 
@@ -39,16 +40,6 @@ export class Board {
     /**
      * @param unit
      */
-    private findUnit(unit: Unit): Square {
-        if (!this.units.has(unit)) {
-            throw 'No such unit on the board';
-        }
-        return <Square>this.units.get(unit);
-    }
-
-    /**
-     * @param unit
-     */
     public* availableTurns(unit: Unit): Iterable<Square> {
         const current = this.findUnit(unit);
         let possible: Square;
@@ -64,6 +55,34 @@ export class Board {
                 yield Object.assign({}, possible);
             }
         }
+    }
+
+    /**
+     *
+     */
+    public get size(): number {
+        return this._size;
+    }
+
+    public dumpUnits(): BoardDump {
+        let data: BoardDump = [];
+        this.units.forEach((square: Square, unit: Unit) => {
+            if (!Array.isArray(data[square.x])) {
+                data[square.x] = [];
+            }
+            data[square.x][square.y] = unit.weapon;
+        });
+        return data;
+    }
+
+    /**
+     * @param unit
+     */
+    private findUnit(unit: Unit): Square {
+        if (!this.units.has(unit)) {
+            throw 'No such unit on the board';
+        }
+        return <Square>this.units.get(unit);
     }
 
     /**
@@ -106,13 +125,13 @@ export class Board {
      * @param square
      */
     private isSquareFits(square: Square): boolean {
-        return square.x >= 0 && square.x < this._size && square.y >= 0 && square.y < this._size;
+        return square.x >= 0 && square.x < this.size && square.y >= 0 && square.y < this.size;
     }
 
     /**
      *
      */
-    private dumpMap(){
+    private dumpMap() {
         console.log(this.units);
     }
 
