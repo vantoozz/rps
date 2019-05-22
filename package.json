@@ -6,7 +6,7 @@
   "author": "vantoozz@gmail.com",
   "main": "dist/index.html",
   "scripts": {
-    "build": "webpack --mode production",
+    "build": "rm -rf dist && webpack --mode production",
     "start": "webpack-dev-server --mode development --open --hot"
   },
   "dependencies": {
@@ -22,7 +22,6 @@
     "@types/react": "^16.8.13",
     "@types/react-dom": "^16.8.4",
     "@types/react-redux": "^7.0.8",
-    "@types/redux": "^3.6.0",
     "@typescript-eslint/eslint-plugin": "^1.6.0",
     "@typescript-eslint/parser": "^1.6.0",
     "awesome-typescript-loader": "^5.2.1",

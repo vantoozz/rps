@@ -22,7 +22,7 @@
     "noUnusedParameters": true,
     "strictNullChecks": true,
     "rootDir": "src",
-    "outDir": "dist",
+    "outDir": "build",
     "baseUrl": "./",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
