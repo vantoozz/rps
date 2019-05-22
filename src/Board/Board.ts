@@ -1,9 +1,9 @@
 import {Unit} from "../Units/Unit";
 import {Square} from "./Square";
 import {BoardDump} from "./BoardDump";
+import {Result} from "../Units/Result";
 
 export class Board {
-
     private readonly units: Map<Unit, Square> = new Map<Unit, Square>();
 
     private readonly _size: number;
@@ -46,7 +46,7 @@ export class Board {
     /**
      * @param unit
      */
-    public* availableTurns(unit: Unit): Iterable<Square> {
+    public* availableMove(unit: Unit): Iterable<Square> {
         const current = this.findUnit(unit);
         let possible: Square;
         for (let offsetX of [-1, 0, 1]) {
@@ -63,6 +63,56 @@ export class Board {
         }
     }
 
+
+    /**
+     *
+     */
+    public mayBeAttacked(from: Square, square: Square): boolean {
+        this.unitAt(from);
+        if (this.isSquareFree(square)) {
+            return false;
+        }
+        const offsetX: number = Math.abs(from.x - square.x);
+        const offsetY: number = Math.abs(from.y - square.y);
+
+        return (1 === offsetX && 0 === offsetY) || (0 === offsetX && 1 === offsetY);
+    }
+
+    /**
+     *
+     * @param from
+     * @param to
+     */
+    public move(from: Square, to: Square): void {
+        const unit: Unit = this.unitAt(from);
+        if (!this.isMoveAvailable(unit, to)) {
+            throw "Unavailable move";
+        }
+        this.units.set(unit, to);
+        this.dumpMap();
+    }
+
+    /**
+     *
+     * @param from
+     * @param to
+     */
+    public attack(from: Square, to: Square): Result {
+        const unit1: Unit = this.unitAt(from);
+        if (!this.mayBeAttacked(from, to)) {
+            throw "Unavailable attack";
+        }
+        let unit2 = this.unitAt(to);
+        const result = unit1.fight(unit2);
+        if (Result.Win === result) {
+            this.remove(unit2);
+        } else if (Result.Lose === result) {
+            this.remove(unit1);
+        }
+        this.dumpMap();
+        return result;
+    }
+
     /**
      *
      */
@@ -70,6 +120,9 @@ export class Board {
         return this._size;
     }
 
+    /**
+     *
+     */
     public dumpUnits(): BoardDump {
         let data: BoardDump = [];
         this.units.forEach((square: Square, unit: Unit) => {
@@ -79,6 +132,19 @@ export class Board {
             data[square.x][square.y] = unit.weapon;
         });
         return data;
+    }
+
+    /**
+     * @param unit
+     * @param square
+     */
+    private isMoveAvailable(unit: Unit, square: Square): boolean {
+        for (const turn of this.availableMove(unit)) {
+            if (turn.x === square.x && turn.y === square.y) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

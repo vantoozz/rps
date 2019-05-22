@@ -17,7 +17,7 @@ board.add(unit3, {x: 4, y: 3});
 const result = unit1.fight(unit2);
 if (Result.Win === result) {
     board.remove(unit2);
-    console.log([...board.availableTurns(unit1)]);
+    console.log([...board.availableMove(unit1)]);
     console.log('Unit1 wins');
 } else if (Result.Lose === result) {
     board.remove(unit1);

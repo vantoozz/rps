@@ -4,13 +4,14 @@ import {BoardDump} from "../../Board/BoardDump";
 import {Weapon} from "../../Units/Weapon";
 import {Square} from "../../Board/Square";
 import classNames from "classnames";
+import {Result} from "../../Units/Result";
 
 interface BoardViewProps {
     board: Board;
 }
 
 interface BoardViewState {
-    selectedUnit: Square;
+    selectedSquare?: Square;
 }
 
 export default class extends React.PureComponent<BoardViewProps, BoardViewState> {
@@ -26,11 +27,68 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
         )
     }
 
+    /**
+     * @param square
+     */
     private handleUnitClick(square: Square): void {
-        console.log(square);
-        this.setState({selectedUnit: square});
+
+        if (this.isUnderAttack(square)) {
+            return this.handleAttack(square);
+        }
+
+        if (this.isSelected(square)) {
+            this.setState({selectedSquare: undefined});
+            return;
+        }
+        this.setState({selectedSquare: square});
     }
 
+    /**
+     * @param square
+     */
+    private handleAttack(square: Square): void {
+        if (!this.state || undefined === this.state.selectedSquare) {
+            return;
+        }
+        let result: Result;
+        try {
+            result = this.props.board.attack(this.state.selectedSquare, square);
+        } catch (e) {
+            console.error(e);
+            return;
+        }
+        if (Result.Win === result) {
+            this.move(this.state.selectedSquare, square);
+        } else if (Result.Lose === result) {
+            this.setState({selectedSquare: undefined});
+        }
+    }
+
+    /**
+     * @param square
+     */
+    private handleSquareClick(square: Square): void {
+        if (!this.state || undefined === this.state.selectedSquare) {
+            return;
+        }
+        this.move(this.state.selectedSquare, square);
+    }
+
+    /**
+     *
+     * @param from
+     * @param to
+     */
+    private move(from: Square, to: Square) {
+        try {
+            this.props.board.move(from, to);
+        } catch (e) {
+            console.error(e);
+            return;
+        }
+
+        this.setState({selectedSquare: to});
+    }
 
     /**
      * @param board
@@ -39,13 +97,13 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
         const rows: React.ReactElement[] = [];
         const units: BoardDump = board.dumpUnits();
 
-        for (let x = 0; x < board.size; x++) {
+        for (let y = 0; y < board.size; y++) {
             let squares = [];
-            for (let y = 0; y < board.size; y++) {
+            for (let x = 0; x < board.size; x++) {
                 let squareElement = this.drawSquare(units, {x, y});
-                squares.push(<td key={y}>{squareElement}</td>);
+                squares.push(<td key={x}>{squareElement}</td>);
             }
-            rows.push(<tr key={x}>{squares}</tr>);
+            rows.push(<tr key={y}>{squares}</tr>);
         }
         return <tbody>{rows}</tbody>;
     };
@@ -57,12 +115,22 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
     private drawSquare(units: BoardDump, square: Square): React.ReactElement {
         const {x, y} = square;
         if (!Array.isArray(units[x]) || units[x][y] === undefined) {
-            return <>□</>;
+            return (
+                <span
+                    className='square'
+                    onClick={(): void => this.handleSquareClick(square)}
+                >
+                    □
+                </span>
+            );
         }
 
+        const underAttack = this.isUnderAttack(square);
+
         const elementClasses = classNames({
-            'unit': true,
-            selected: this.state && this.state.selectedUnit && this.state.selectedUnit.x === x && this.state.selectedUnit.y === y
+            unit: true,
+            selected: this.isSelected(square),
+            underAttack: underAttack,
         });
 
         return (
@@ -75,6 +143,25 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
         );
     }
 
+    /**
+     * @param square
+     */
+    private isUnderAttack(square: Square): boolean {
+
+        if (!this.state || this.state.selectedSquare === undefined) {
+            return false;
+        }
+
+        return this.props.board.mayBeAttacked(this.state.selectedSquare, square);
+    }
+
+    /**
+     * @param square
+     */
+    private isSelected(square: Square): boolean {
+        return this.state && this.state.selectedSquare !== undefined
+            && this.state.selectedSquare.x === square.x && this.state.selectedSquare.y === square.y;
+    }
 
     /**
      * @param weapon

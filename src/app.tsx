@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import App from './Components/App';
 
 ReactDOM.render(
-    <App color='white'/>,
+    <App/>,
     document.getElementById('root')
 );
 

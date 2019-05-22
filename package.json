@@ -6,8 +6,8 @@
   "author": "vantoozz@gmail.com",
   "main": "dist/index.html",
   "scripts": {
-    "build": "rm -rf dist && webpack --mode production",
-    "start": "webpack-dev-server --mode development --open --hot"
+    "dist": "rm -rf dist && webpack --mode production",
+    "dev": "webpack-dev-server --mode development --open --hot"
   },
   "dependencies": {
     "classnames": "^2.2.6",
