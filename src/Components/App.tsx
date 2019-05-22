@@ -1,5 +1,5 @@
 import * as React from 'react';
-import BoardView from "./Board";
+import BoardView from "./Board/Board";
 import {Board} from "../Board/Board";
 import {Weapon} from "../Units/Weapon";
 import {Unit} from "../Units/Unit";
@@ -12,7 +12,7 @@ board.add(new Unit(Weapon.Paper), {x: 4, y: 4});
 
 
 export default (props: { color: string }): React.ReactElement =>
-    <React.Fragment>
+    <>
         <p>The color of this page is: {props.color}</p>
         <BoardView board={board}/>
-    </React.Fragment>
+    </>
