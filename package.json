@@ -6,8 +6,8 @@
   "author": "vantoozz@gmail.com",
   "main": "dist/index.html",
   "scripts": {
-    "dist": "rm -rf dist && webpack --mode production",
-    "dev": "webpack-dev-server --mode development --open --hot"
+    "dev": "webpack-dev-server --mode development --open --hot",
+    "dist": "rm -rf dist && webpack --mode production"
   },
   "dependencies": {
     "classnames": "^2.2.6",
@@ -17,7 +17,8 @@
     "react-dom": "^16.8.6",
     "react-redux": "^7.0.3",
     "redux": "^4.0.1",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.1.13",
+    "ts-custom-error": "^3.1.0"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.7",

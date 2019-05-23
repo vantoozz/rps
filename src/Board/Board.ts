@@ -2,6 +2,8 @@ import {Unit} from "../Units/Unit";
 import {Square} from "./Square";
 import {BoardDump} from "./BoardDump";
 import {Result} from "../Units/Result";
+import IncorrectTurnException from "../Exceptions/IncorrectTurnException";
+import BoardException from "../Exceptions/BoardException";
 
 export class Board {
     private readonly units: Map<Unit, Square> = new Map<Unit, Square>();
@@ -18,16 +20,17 @@ export class Board {
     /**
      * @param unit
      * @param square
+     * @throws BoardException
      */
     public add(unit: Unit, square: Square): void {
         if (!this.isSquareFits(square)) {
-            throw 'Square is out the board';
+            throw new BoardException('Square is out the board');
         }
         if (!this.isSquareFree(square)) {
-            throw 'There already is an unit here';
+            throw new BoardException('There already is an unit here');
         }
         if (this.isUnitOnBoard(unit)) {
-            throw 'The unit is already there';
+            throw new BoardException('The unit is already there');
         }
 
         this.units.set(unit, square);
@@ -45,6 +48,7 @@ export class Board {
 
     /**
      * @param unit
+     * @throws BoardException
      */
     public* availableMove(unit: Unit): Iterable<Square> {
         const current = this.findUnit(unit);
@@ -68,7 +72,9 @@ export class Board {
      *
      */
     public mayBeAttacked(from: Square, square: Square): boolean {
-        this.unitAt(from);
+        if(this.isSquareFree(from)){
+            return false;
+        }
         if (this.isSquareFree(square)) {
             return false;
         }
@@ -82,11 +88,13 @@ export class Board {
      *
      * @param from
      * @param to
+     * @throws IncorrectTurnException
+     * @throws BoardException
      */
     public move(from: Square, to: Square): void {
         const unit: Unit = this.unitAt(from);
         if (!this.isMoveAvailable(unit, to)) {
-            throw "Unavailable move";
+            throw new IncorrectTurnException('Unavailable move');
         }
         this.units.set(unit, to);
         this.dumpMap();
@@ -96,12 +104,14 @@ export class Board {
      *
      * @param from
      * @param to
+     * @throws IncorrectTurnException
+     * @throws BoardException
      */
     public attack(from: Square, to: Square): Result {
-        const unit1: Unit = this.unitAt(from);
         if (!this.mayBeAttacked(from, to)) {
-            throw "Unavailable attack";
+            throw new IncorrectTurnException('Unavailable attack');
         }
+        const unit1: Unit = this.unitAt(from);
         let unit2 = this.unitAt(to);
         const result = unit1.fight(unit2);
         if (Result.Win === result) {
@@ -149,16 +159,18 @@ export class Board {
 
     /**
      * @param unit
+     * @throws BoardException
      */
     private findUnit(unit: Unit): Square {
         if (!this.units.has(unit)) {
-            throw 'No such unit on the board';
+            throw new BoardException('No such unit on the board');
         }
         return this.units.get(unit) as Square;
     }
 
     /**
      * @param square
+     * @throws BoardException
      */
     private unitAt(square: Square): Unit {
         for (let [unit, unitSquare] of this.units) {
@@ -166,7 +178,7 @@ export class Board {
                 return unit;
             }
         }
-        throw 'No unit on the square';
+        throw new BoardException('No unit on the square');
     }
 
     /**
@@ -175,8 +187,11 @@ export class Board {
     private isUnitOnBoard(unit: Unit): boolean {
         try {
             this.findUnit(unit);
-        } catch {
-            return false;
+        } catch (e) {
+            if (e instanceof BoardException) {
+                return false;
+            }
+            throw e;
         }
         return true;
     }
@@ -187,8 +202,11 @@ export class Board {
     private isSquareFree(square: Square): boolean {
         try {
             this.unitAt(square);
-        } catch {
-            return true;
+        } catch (e) {
+            if (e instanceof BoardException) {
+                return true;
+            }
+            throw e;
         }
         return false;
     }

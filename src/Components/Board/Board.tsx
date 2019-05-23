@@ -58,7 +58,7 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
             return;
         }
         if (Result.Win === result) {
-            this.move(this.state.selectedSquare, square);
+            this.moveUnit(this.state.selectedSquare, square);
         } else if (Result.Lose === result) {
             this.setState({selectedSquare: undefined});
         }
@@ -71,7 +71,7 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
         if (!this.state || undefined === this.state.selectedSquare) {
             return;
         }
-        this.move(this.state.selectedSquare, square);
+        this.moveUnit(this.state.selectedSquare, square);
     }
 
     /**
@@ -79,7 +79,7 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
      * @param from
      * @param to
      */
-    private move(from: Square, to: Square) {
+    private moveUnit(from: Square, to: Square): void {
         try {
             this.props.board.move(from, to);
         } catch (e) {
