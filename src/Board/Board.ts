@@ -114,15 +114,24 @@ export class Board {
         if (!this.mayBeAttacked(from, to)) {
             throw new IncorrectTurnException('Unavailable attack');
         }
-        const unit1: Unit = this.unitAt(from);
-        let unit2 = this.unitAt(to);
-        const result = unit1.fight(unit2);
+        const attacker: Unit = this.unitAt(from);
+        let attacked = this.unitAt(to);
+        const result = attacker.fight(attacked);
         if (Result.Win === result) {
-            this.remove(unit2);
+            this.remove(attacked);
+            this.move(from, to);
         } else if (Result.Lose === result) {
-            this.remove(unit1);
+            this.capture(attacked, attacker);
         }
         return result;
+    }
+
+    private capture(attacker: Unit, attacked: Unit): void{
+        const teamOne = this.teams.get(attacker);
+        if(undefined === teamOne){
+            return;
+        }
+        this.teams.set(attacked, teamOne);
     }
 
     /**

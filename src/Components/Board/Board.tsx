@@ -4,8 +4,8 @@ import {BoardDump} from "../../Board/BoardDump";
 import {Weapon} from "../../Units/Weapon";
 import {Square} from "../../Board/Square";
 import classNames from "classnames";
-import {Result} from "../../Units/Result";
 import MessageLog from "./MessageLog";
+import AppException from "../../Exceptions/AppException";
 
 interface BoardViewProps {
     board: Board;
@@ -67,18 +67,14 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
         if (!this.state || undefined === this.state.selectedSquare) {
             return;
         }
-        let result: Result;
         try {
-            result = this.props.board.attack(this.state.selectedSquare, square);
+            this.props.board.attack(this.state.selectedSquare, square);
         } catch (e) {
-            this.log(e.toString());
+            this.log((e as AppException).message);
             return;
         }
-        if (Result.Win === result) {
-            this.moveUnit(this.state.selectedSquare, square);
-        } else if (Result.Lose === result) {
-            this.setState({selectedSquare: undefined});
-        }
+
+        this.setState({selectedSquare: undefined});
     }
 
     /**
@@ -100,7 +96,7 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
         try {
             this.props.board.move(from, to);
         } catch (e) {
-            this.log(e.toString());
+            this.log((e as AppException).message);
             return;
         }
 
