@@ -4,9 +4,12 @@ import {BoardDump} from "./BoardDump";
 import {Result} from "../Units/Result";
 import IncorrectTurnException from "../Exceptions/IncorrectTurnException";
 import BoardException from "../Exceptions/BoardException";
+import Team from "../Team/Team";
 
 export class Board {
     private readonly units: Map<Unit, Square> = new Map<Unit, Square>();
+
+    private readonly teams: Map<Unit, Team> = new Map<Unit, Team>();
 
     private readonly _size: number;
 
@@ -20,9 +23,10 @@ export class Board {
     /**
      * @param unit
      * @param square
+     * @param team
      * @throws BoardException
      */
-    public add(unit: Unit, square: Square): void {
+    public add(unit: Unit, square: Square, team: Team): void {
         if (!this.isSquareFits(square)) {
             throw new BoardException('Square is out the board');
         }
@@ -34,16 +38,7 @@ export class Board {
         }
 
         this.units.set(unit, square);
-
-        this.dumpMap();
-    }
-
-    /**
-     * @param unit
-     */
-    public remove(unit: Unit): void {
-        this.units.delete(unit);
-        this.dumpMap();
+        this.teams.set(unit, team);
     }
 
     /**
@@ -67,22 +62,30 @@ export class Board {
         }
     }
 
-
     /**
      *
      */
     public mayBeAttacked(from: Square, square: Square): boolean {
-        if(this.isSquareFree(from)){
+        if (this.isSquareFree(from)) {
             return false;
         }
         if (this.isSquareFree(square)) {
             return false;
         }
+
         const offsetX: number = Math.abs(from.x - square.x);
         const offsetY: number = Math.abs(from.y - square.y);
 
-        return (1 === offsetX && 0 === offsetY) || (0 === offsetX && 1 === offsetY);
+        const reachable = (1 === offsetX && 0 === offsetY) || (0 === offsetX && 1 === offsetY);
+
+        if (!reachable) {
+            return false;
+        }
+
+        return !this.areInTheSameTeam(from, square);
+
     }
+
 
     /**
      *
@@ -97,8 +100,8 @@ export class Board {
             throw new IncorrectTurnException('Unavailable move');
         }
         this.units.set(unit, to);
-        this.dumpMap();
     }
+
 
     /**
      *
@@ -119,7 +122,6 @@ export class Board {
         } else if (Result.Lose === result) {
             this.remove(unit1);
         }
-        this.dumpMap();
         return result;
     }
 
@@ -131,15 +133,22 @@ export class Board {
     }
 
     /**
-     *
+     * @throws BoardException
      */
     public dumpUnits(): BoardDump {
         let data: BoardDump = [];
-        this.units.forEach((square: Square, unit: Unit) => {
+        this.units.forEach((square: Square, unit: Unit): void => {
             if (!Array.isArray(data[square.x])) {
                 data[square.x] = [];
             }
-            data[square.x][square.y] = unit.weapon;
+            const team = this.teams.get(unit);
+            if (team === undefined) {
+                throw new BoardException('User has no team');
+            }
+            data[square.x][square.y] = {
+                weapon: unit.weapon,
+                colour: team.colour
+            };
         });
         return data;
     }
@@ -155,6 +164,33 @@ export class Board {
             }
         }
         return false;
+    }
+
+    /**
+     * @param unit
+     */
+    private remove(unit: Unit): void {
+        this.units.delete(unit);
+    }
+
+    /**
+     *
+     * @param one
+     * @param two
+     */
+    private areInTheSameTeam(one: Square, two: Square): boolean {
+
+        const teamOne = this.teams.get(this.unitAt(one));
+        if (undefined === teamOne) {
+            return false;
+        }
+
+        const teamTwo = this.teams.get(this.unitAt(two));
+        if (undefined === teamTwo) {
+            return false;
+        }
+
+        return teamOne.colour === teamTwo.colour;
     }
 
     /**
@@ -217,12 +253,4 @@ export class Board {
     private isSquareFits(square: Square): boolean {
         return square.x >= 0 && square.x < this.size && square.y >= 0 && square.y < this.size;
     }
-
-    /**
-     *
-     */
-    private dumpMap() {
-        console.log(this.units);
-    }
-
 }

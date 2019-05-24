@@ -5,6 +5,7 @@ import {Weapon} from "../../Units/Weapon";
 import {Square} from "../../Board/Square";
 import classNames from "classnames";
 import {Result} from "../../Units/Result";
+import MessageLog from "./MessageLog";
 
 interface BoardViewProps {
     board: Board;
@@ -12,18 +13,34 @@ interface BoardViewProps {
 
 interface BoardViewState {
     selectedSquare?: Square;
+    log: string[];
 }
 
 export default class extends React.PureComponent<BoardViewProps, BoardViewState> {
 
     /**
      *
+     * @param props
+     */
+    public constructor(props: BoardViewProps) {
+        super(props);
+
+        this.state = {
+            log: []
+        }
+    }
+
+
+    /**
+     *
      */
     public render(): React.ReactElement {
         return (
-            <table>
+            <>
                 {this.drawTable(this.props.board)}
-            </table>
+                <MessageLog messages={this.state.log}/>
+            </>
+
         )
     }
 
@@ -54,7 +71,7 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
         try {
             result = this.props.board.attack(this.state.selectedSquare, square);
         } catch (e) {
-            console.error(e);
+            this.log(e.toString());
             return;
         }
         if (Result.Win === result) {
@@ -83,7 +100,7 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
         try {
             this.props.board.move(from, to);
         } catch (e) {
-            console.error(e);
+            this.log(e.toString());
             return;
         }
 
@@ -105,7 +122,9 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
             }
             rows.push(<tr key={y}>{squares}</tr>);
         }
-        return <tbody>{rows}</tbody>;
+        return <table>
+            <tbody>{rows}</tbody>
+        </table>;
     };
 
     /**
@@ -125,20 +144,17 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
             );
         }
 
-        const underAttack = this.isUnderAttack(square);
-
         const elementClasses = classNames({
-            unit: true,
             selected: this.isSelected(square),
-            underAttack: underAttack,
-        });
+            underAttack: this.isUnderAttack(square),
+        }, 'unit', `colour${units[x][y].colour}`);
 
         return (
             <span
                 className={elementClasses}
                 onClick={(): void => this.handleUnitClick(square)}
             >
-                {this.drawWeapon(units[x][y])}
+                {this.drawWeapon(units[x][y].weapon)}
             </span>
         );
     }
@@ -177,4 +193,13 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
         }
         throw 'Unknown weapon';
     };
+
+    /**
+     * @param message
+     */
+    private log(message: string): void {
+        this.setState((prevState): { log: string[] } => ({
+            log: [...prevState.log, message]
+        }))
+    }
 }
