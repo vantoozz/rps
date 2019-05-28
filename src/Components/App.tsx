@@ -1,17 +1,17 @@
 import * as React from 'react';
-import BoardView from "./Board/Board";
-import {Board} from "../Board/Board";
+import BoardView from "./Board/BoardView";
 import {Weapon} from "../Units/Weapon";
 import {Unit} from "../Units/Unit";
 import {Colour} from "../Team/Colour";
 import Team from "../Team/Team";
-
+import {container} from '../bootstrap';
+import BoardClientInterface, {BoardClient} from "../BoardClient/BoardClientInterface";
 
 const reds = new Team(Colour.Red);
 const whites = new Team(Colour.White);
 const greens = new Team(Colour.Green);
 
-const board = new Board(7);
+const board: BoardClientInterface = container.get(BoardClient);
 
 board.add(new Unit(Weapon.Paper), {x: 0, y: 0}, reds);
 board.add(new Unit(Weapon.Scissor), {x: 1, y: 0}, reds);

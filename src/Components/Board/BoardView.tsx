@@ -1,28 +1,28 @@
 import * as React from 'react';
-import {Board} from "../../Board/Board";
 import {BoardDump} from "../../Board/BoardDump";
 import {Weapon} from "../../Units/Weapon";
 import {Square} from "../../Board/Square";
 import classNames from "classnames";
 import MessageLog from "./MessageLog";
 import AppException from "../../Exceptions/AppException";
+import BoardClientInterface from "../../BoardClient/BoardClientInterface";
 
-interface BoardViewProps {
-    board: Board;
+interface Props {
+    board: BoardClientInterface;
 }
 
-interface BoardViewState {
+interface State {
     selectedSquare?: Square;
     log: string[];
 }
 
-export default class extends React.PureComponent<BoardViewProps, BoardViewState> {
+export default class BoardView extends React.PureComponent<Props, State> {
 
     /**
      *
      * @param props
      */
-    public constructor(props: BoardViewProps) {
+    public constructor(props: Props) {
         super(props);
 
         this.state = {
@@ -37,7 +37,7 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
     public render(): React.ReactElement {
         return (
             <>
-                {this.drawTable(this.props.board)}
+                {this.drawTable()}
                 <MessageLog messages={this.state.log}/>
             </>
 
@@ -104,15 +104,15 @@ export default class extends React.PureComponent<BoardViewProps, BoardViewState>
     }
 
     /**
-     * @param board
+     *
      */
-    private drawTable = (board: Board): React.ReactElement => {
+    private drawTable = (): React.ReactElement => {
         const rows: React.ReactElement[] = [];
-        const units: BoardDump = board.dumpUnits();
+        const units: BoardDump = this.props.board.dumpUnits();
 
-        for (let y = 0; y < board.size; y++) {
+        for (let y = 0; y < this.props.board.size; y++) {
             let squares = [];
-            for (let x = 0; x < board.size; x++) {
+            for (let x = 0; x < this.props.board.size; x++) {
                 let squareElement = this.drawSquare(units, {x, y});
                 squares.push(<td key={x}>{squareElement}</td>);
             }

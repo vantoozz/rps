@@ -110,7 +110,7 @@ export class Board {
      * @throws IncorrectTurnException
      * @throws BoardException
      */
-    public attack(from: Square, to: Square): Result {
+    public attack(from: Square, to: Square): void {
         if (!this.mayBeAttacked(from, to)) {
             throw new IncorrectTurnException('Unavailable attack');
         }
@@ -123,7 +123,6 @@ export class Board {
         } else if (Result.Lose === result) {
             this.capture(attacked, attacker);
         }
-        return result;
     }
 
     private capture(attacker: Unit, attacked: Unit): void{
